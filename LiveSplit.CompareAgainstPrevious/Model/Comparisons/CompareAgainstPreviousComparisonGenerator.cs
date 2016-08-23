@@ -14,8 +14,19 @@ namespace LiveSplit.CompareAgainstPrevious
         public const string ComparisonName = "My Previous Splits";
         public const string ShortComparisonName = "My Previous";
         public string Name => ComparisonName;
+        private IRun _Run;
+
+        public event EventHandler RunChanged;
         
-        public IRun Run { get; set; }
+        public IRun Run
+        {
+            get { return _Run; }
+            set
+            {
+                _Run = value;
+                RunChanged?.Invoke(this, new EventArgs());
+            }
+        }
 
         public CompareAgainstPreviousComparisonGenerator(IRun run)
         {

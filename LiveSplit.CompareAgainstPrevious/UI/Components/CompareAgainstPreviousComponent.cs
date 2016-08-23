@@ -3,10 +3,11 @@ using LiveSplit.UI;
 using LiveSplit.UI.Components;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Windows.Forms;
+using System.Linq;
 using System.Xml;
+using System.Xml.Linq;
+using System.IO;
+using System.Windows.Forms;
 
 namespace LiveSplit.CompareAgainstPrevious
 {
@@ -15,16 +16,47 @@ namespace LiveSplit.CompareAgainstPrevious
 
         //public CompareAgainstPreviousSettings Settings;
         public LiveSplitState State;
+        private CompareAgainstPreviousComparisonGenerator _Generator;
 
         public CompareAgainstPreviousComponent(LiveSplitState state)
         {
             //Settings = new CompareAgainstPreviousSettings();
 
             State = state;
-            State.Run.ComparisonGenerators.Add(new CompareAgainstPreviousComparisonGenerator(State.Run));
+            _Generator = new CompareAgainstPreviousComparisonGenerator(state.Run);
+            _Generator.RunChanged += _Generator_RunChanged;
+            LoadLastRunFromFile(state.Run.FilePath);
 
+            State.Run.ComparisonGenerators.Add(_Generator);
             state.OnSplit += State_OnSplit;
             state.OnReset += State_OnReset;
+
+            
+        }
+
+        private void LoadLastRunFromFile(string filePath)
+        {
+            XDocument document;
+            using (var stream = File.OpenRead(filePath))
+            {                
+                document = XDocument.Load(stream);
+            }
+
+            var segments = document.Descendants("Run").Descendants("Segments").Descendants("Segment");
+            foreach (var segment in segments)
+            {
+                // Look at the segment history and take the final node (ID should be the greatest)
+                var segmentHistories = segment.Descendants("Time");
+                var latestRunId = segmentHistories.Max(e => int.Parse(e.Attribute("id").Value));
+                var latestRun = segmentHistories.Where(item => int.Parse(item.Attribute("id").Value) == latestRunId).First();
+
+                // Take the latest run and stuff it into the comparison generator as the -latest- run so it can be compared against
+            }
+        }
+
+        private void _Generator_RunChanged(object sender, EventArgs e)
+        {
+            LoadLastRunFromFile(State.Run.FilePath);
         }
 
         private void State_OnReset(object sender, TimerPhase value)
