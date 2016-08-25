@@ -17,7 +17,10 @@ namespace LiveSplit.CompareAgainstPrevious
         private IRun _Run;
 
         public event EventHandler RunChanged;
+        private IList<Time> _OverrideSegments = new List<Time>();
         
+        public bool IsReset { get; set; }
+
         public IRun Run
         {
             get { return _Run; }
@@ -33,8 +36,19 @@ namespace LiveSplit.CompareAgainstPrevious
             Run = run;
         }
 
+        public void SetOverrideSegments(IList<Time> segments)
+        {
+            _OverrideSegments = segments;
+        }
+
         public void Generate(ISettings settings)
         {
+            if (IsReset)
+            {
+                IsReset = false;
+                return;
+            }
+
             TimeSpan? currentSegmentRTA = TimeSpan.Zero;
             TimeSpan? previousSplitTimeRTA = TimeSpan.Zero;
             TimeSpan? currentSegmentGameTime = TimeSpan.Zero;
@@ -42,19 +56,61 @@ namespace LiveSplit.CompareAgainstPrevious
 
             var runs = Run.Skip(0).Take(Run.Count).ToArray();
             var index = 0;
-            foreach (var segment in Run)
+
+            if (_OverrideSegments.Count() == 0)
             {
-                currentSegmentGameTime = previousSplitTimeGameTime + runs[index].CompareAgainstPrevious().GameTime;
-                previousSplitTimeGameTime = runs[index].CompareAgainstPrevious().GameTime;
+                foreach (var segment in Run)
+                {
 
-                currentSegmentRTA = previousSplitTimeRTA + runs[index].CompareAgainstPrevious().RealTime;
-                previousSplitTimeRTA = runs[index].CompareAgainstPrevious().RealTime;
+                    var newPrevSplit = new Time(realTime: null, gameTime: null);
+                    if (runs[index].CompareAgainstPrevious().RealTime != null)
+                    {
+                        currentSegmentRTA = previousSplitTimeRTA + runs[index].CompareAgainstPrevious().RealTime;
+                        previousSplitTimeRTA = currentSegmentRTA;
+                        newPrevSplit.RealTime = currentSegmentRTA;
+                    }
+                    if (runs[index].CompareAgainstPrevious().GameTime != null)
+                    {
+                        currentSegmentGameTime = previousSplitTimeGameTime + runs[index].CompareAgainstPrevious().GameTime;
+                        previousSplitTimeGameTime = currentSegmentGameTime;
+                        newPrevSplit.GameTime = currentSegmentGameTime;
+                    }
 
-                segment.Comparisons[Name] = new Time(
-                    currentSegmentRTA,
-                    currentSegmentGameTime);
-                index++;
+                    segment.Comparisons[Name] = newPrevSplit;
+                    index++;
+
+                }
             }
+            else
+            {
+                foreach (var segment in Run)
+                {
+                    TimeSpan? gameTimeSegment = null;
+                    TimeSpan? rtaSegment = null;
+                    if (_OverrideSegments[index].GameTime != null)
+                    {
+                        currentSegmentGameTime = previousSplitTimeGameTime + _OverrideSegments[index].GameTime;
+                        previousSplitTimeGameTime = currentSegmentGameTime;
+
+                        gameTimeSegment = currentSegmentGameTime;
+                    }
+
+
+                    if (_OverrideSegments[index].RealTime != null)
+                    {
+                        currentSegmentRTA = previousSplitTimeRTA + _OverrideSegments[index].RealTime;
+                        previousSplitTimeRTA = currentSegmentRTA;
+
+                        rtaSegment = currentSegmentRTA;
+                    }
+
+                    segment.Comparisons[Name] = new Time(
+                        rtaSegment,
+                        gameTimeSegment);
+                    index++;
+                }
+            }
+            _OverrideSegments.Clear();
         }
     }
 }
