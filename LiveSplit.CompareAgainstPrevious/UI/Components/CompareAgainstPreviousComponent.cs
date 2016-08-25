@@ -105,13 +105,10 @@ namespace LiveSplit.CompareAgainstPrevious
 
         private void State_OnUndoSplit(object sender, EventArgs e)
         {
-
         }
 
         private void State_OnSkipSplit(object sender, EventArgs e)
         {
-            //var splitState = sender as LiveSplitState;
-            //splitState.CurrentSplit.CompareAgainstPrevious(new Time(realTime: default(TimeSpan), gameTime: default(TimeSpan)));
         }
 
         private void State_OnSplit(object sender, EventArgs e)
