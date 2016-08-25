@@ -26,7 +26,9 @@ namespace LiveSplit.CompareAgainstPrevious
             State = state;
             _Generator = new CompareAgainstPreviousComparisonGenerator(state.Run);
             _Generator.RunChanged += _Generator_RunChanged;
-            LoadLastRunFromFile(state.Run.FilePath);
+
+            if (File.Exists(state.Run.FilePath))
+                LoadLastRunFromFile(state.Run.FilePath);
 
             State.Run.ComparisonGenerators.Add(_Generator);
             state.OnSplit += State_OnSplit;
