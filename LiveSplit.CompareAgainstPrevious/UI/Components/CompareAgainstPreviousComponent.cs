@@ -94,6 +94,7 @@ namespace LiveSplit.CompareAgainstPrevious
 
         private void State_OnReset(object sender, TimerPhase value)
         {
+            // If the run was reset before it was complete we don't want to compare against it... 
             if (!_SuccessfulRun)
                 _Generator.IsReset = true;
 
@@ -122,6 +123,8 @@ namespace LiveSplit.CompareAgainstPrevious
             // When a run ends we want to update the splits for the monitored split for real time or game time
             if (State.CurrentPhase == TimerPhase.Ended)
             {
+                // When a run ends we hit this before reset, so we need to make sure
+                // We don't ignore the run
                 _SuccessfulRun = true;   
                 foreach (Segment split in State.Run)
                 {
