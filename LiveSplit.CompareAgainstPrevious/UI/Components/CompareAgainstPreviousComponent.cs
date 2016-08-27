@@ -31,12 +31,12 @@ namespace LiveSplit.CompareAgainstPrevious
                 LoadLastRunFromFile(state.Run.FilePath);
 
             State.Run.ComparisonGenerators.Add(_Generator);
+            state.Run.CustomComparisons.Add(CompareAgainstPreviousComparisonGenerator.ComparisonName);
+
             state.OnSplit += State_OnSplit;
             State.OnSkipSplit += State_OnSkipSplit;
             state.OnUndoSplit += State_OnUndoSplit;
             state.OnReset += State_OnReset;
-
-            state.Run.CustomComparisons.Add(CompareAgainstPreviousComparisonGenerator.ComparisonName);
         }
 
         private void LoadLastRunFromFile(string filePath)
@@ -54,22 +54,25 @@ namespace LiveSplit.CompareAgainstPrevious
             TimeSpan? previousSplitTimeGameTime = TimeSpan.Zero;
 
             var segments = document.Descendants("Run").Descendants("Segments").Descendants("Segment");
-            int index = 0;
             var segmentSplitTimes = new List<Time>();
             foreach (var segment in segments)
             {
                 // Look at the segment history and take the final node (ID should be the greatest)
                 var segmentHistories = segment.Descendants("Time");
+                if (segmentHistories.Count() == 0)
+                {
+                    // oh gosh we don't have splits yet for this segment
+                    segmentSplitTimes.Add(new Time(realTime: null, gameTime: null));
+                    continue;
+                }
+
                 var latestRunId = segmentHistories.Max(e => int.Parse(e.Attribute("id").Value));
                 var latestRunSplit = segmentHistories.Where(item => int.Parse(item.Attribute("id").Value) == latestRunId).First();
 
                 // Take the latest run and stuff it into the comparison generator 
                 // as the -latest- run so it can be compared against
-                var newPrevSpit = new Time(State.Run[index].CompareAgainstPrevious());
                 var realTimeNode = latestRunSplit.Descendants("RealTime");
                 var gameTimeNode = latestRunSplit.Descendants("GameTime");
-
-                var newPrevSplit = new Time(State.Run[index].CompareAgainstPrevious());
 
                 var overrideSegmentTime = new Time();
 
@@ -91,7 +94,10 @@ namespace LiveSplit.CompareAgainstPrevious
 
         private void _Generator_RunChanged(object sender, EventArgs e)
         {
-            LoadLastRunFromFile(State.Run.FilePath);
+            var generator = sender as CompareAgainstPreviousComparisonGenerator;
+
+            if (!String.IsNullOrEmpty(generator.Run.FilePath) && File.Exists(generator.Run.FilePath))
+                LoadLastRunFromFile(generator.Run.FilePath);
         }
 
         private void State_OnReset(object sender, TimerPhase value)
@@ -159,6 +165,9 @@ namespace LiveSplit.CompareAgainstPrevious
 
         public override void Dispose()
         {
+            State.Run.CustomComparisons.Remove(CompareAgainstPreviousComparisonGenerator.ComparisonName);
+            State.Run.ComparisonGenerators.Remove(_Generator);
+
             State.OnSplit -= State_OnSplit;
             State.OnReset -= State_OnReset;
             State.OnSkipSplit -= State_OnSkipSplit;

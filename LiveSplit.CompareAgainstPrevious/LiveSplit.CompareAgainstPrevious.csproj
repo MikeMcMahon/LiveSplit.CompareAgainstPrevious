@@ -63,7 +63,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetFileName)" "..\..\..\..\LiveSplit\LiveSplit\$(OutDir)Components\$(TargetFileName)" /Y</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetFileName)" "..\..\..\..\LiveSplit\LiveSplit\$(OutDir)Components\$(TargetFileName)" /Y
+copy "$(TargetFileName)" "C:\Users\MikeMcMahon\Downloads\LiveSplit_1.6.9\Components\$(TargetFileName)" /Y</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
