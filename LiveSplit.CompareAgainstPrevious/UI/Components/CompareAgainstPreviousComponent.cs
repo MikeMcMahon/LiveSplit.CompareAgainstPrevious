@@ -8,6 +8,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.IO;
 using System.Windows.Forms;
+using LiveSplit.CompareAgainstPrevious.UI;
 
 namespace LiveSplit.CompareAgainstPrevious
 {
@@ -18,6 +19,7 @@ namespace LiveSplit.CompareAgainstPrevious
         public LiveSplitState State;
         private CompareAgainstPreviousComparisonGenerator _Generator;
         private bool _SuccessfulRun;
+        public CompareAgainstPreviousSettings Settings { get; set; }
 
         public CompareAgainstPreviousComponent(LiveSplitState state)
         {
@@ -31,12 +33,13 @@ namespace LiveSplit.CompareAgainstPrevious
                 LoadLastRunFromFile(state.Run.FilePath);
 
             State.Run.ComparisonGenerators.Add(_Generator);
-            state.Run.CustomComparisons.Add(CompareAgainstPreviousComparisonGenerator.ComparisonName);
 
             state.OnSplit += State_OnSplit;
             State.OnSkipSplit += State_OnSkipSplit;
             state.OnUndoSplit += State_OnUndoSplit;
             state.OnReset += State_OnReset;
+
+            Settings = new CompareAgainstPreviousSettings();
         }
 
         private void LoadLastRunFromFile(string filePath)
@@ -165,7 +168,6 @@ namespace LiveSplit.CompareAgainstPrevious
 
         public override void Dispose()
         {
-            State.Run.CustomComparisons.Remove(CompareAgainstPreviousComparisonGenerator.ComparisonName);
             State.Run.ComparisonGenerators.Remove(_Generator);
 
             State.OnSplit -= State_OnSplit;
@@ -177,8 +179,7 @@ namespace LiveSplit.CompareAgainstPrevious
         
         public override Control GetSettingsControl(LayoutMode mode)
         {
-            return null;
-            //return Settings;
+            return Settings;
         }
 
         public override XmlNode GetSettings(XmlDocument document)

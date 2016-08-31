@@ -55,11 +55,22 @@
     <Compile Include="Model\Comparisons\CompareAgainstPreviousComparisonGenerator.cs" />
     <Compile Include="LiveSplitExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\CompareAgainstPreviousSettings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\CompareAgainstPreviousSettings.Designer.cs">
+      <DependentUpon>CompareAgainstPreviousSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\Components\CompareAgainstPreviousComponent.cs" />
     <Compile Include="UI\Components\CompareAgainstPreviousFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="UI\CompareAgainstPreviousSettings.resx">
+      <DependentUpon>CompareAgainstPreviousSettings.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
