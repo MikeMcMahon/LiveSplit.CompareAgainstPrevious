@@ -46,11 +46,23 @@ namespace LiveSplit.CompareAgainstPrevious
         private void Settings_ComparisonNameChanged(object sender, EventArgs e)
         {
             var settings = sender as CompareAgainstPreviousSettings;
-            CompareAgainstPreviousComparisonGenerator.ComparisonName = settings.ComparisonName;
+            var name = CompareAgainstPreviousComparisonGenerator.ComparisonName;
+            var newName = settings.ComparisonName;
 
-            // Need to find a way to save what's in the generator
-            // Unload it
-            // Reload it
+            // Essentially stolen logic from the LayoutSettingsDialog
+            // First thing first, change the currentcomparison to match what it should be
+            if (State.CurrentComparison == name)
+                State.CurrentComparison = newName;
+
+            // Then for each segment we need to move over the comparison to the new name
+            foreach (var seg in State.Run)
+            {
+                seg.Comparisons[newName] = seg.Comparisons[name];
+                seg.Comparisons.Remove(CompareAgainstPreviousComparisonGenerator.ComparisonName);
+            }
+
+            // Then update the name the comparisongenerator responds to
+            CompareAgainstPreviousComparisonGenerator.ComparisonName = newName;
         }
 
         private void LoadLastRunFromFile(string filePath)

@@ -19,7 +19,7 @@ namespace LiveSplit.CompareAgainstPrevious.UI
             InitializeComponent();
             chkResetRuns.DataBindings.Add("Checked", this, "UseResetRuns", false, DataSourceUpdateMode.OnPropertyChanged);
             resetRunAmount.DataBindings.Add("Value", this, "UseResetRunPercent", false, DataSourceUpdateMode.OnPropertyChanged);
-            txtComparisonName.DataBindings.Add("Text", this, "ComparisonName", false, DataSourceUpdateMode.OnPropertyChanged);
+            txtComparisonName.DataBindings.Add("Text", this, "ComparisonName");
             resetRunAmount_ValueChanged(null, null);
         }
 
