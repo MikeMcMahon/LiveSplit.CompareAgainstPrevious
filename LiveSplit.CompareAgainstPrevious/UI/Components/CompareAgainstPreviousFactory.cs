@@ -24,7 +24,7 @@ namespace LiveSplit.CompareAgainstPrevious
         {
             get
             {
-                return "Compare Against Previous";
+                return "Compare Against Previous Run";
             }
         }
 
@@ -32,7 +32,7 @@ namespace LiveSplit.CompareAgainstPrevious
         {
             get
             {
-                return "Updates the Prev Run Split to always have the previous runs splits";
+                return String.Format("Updates the {0} to always have the previous runs splits", CompareAgainstPreviousComparisonGenerator.ComparisonName);
             }
         }
 

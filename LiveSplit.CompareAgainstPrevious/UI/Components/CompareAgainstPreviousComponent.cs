@@ -40,6 +40,17 @@ namespace LiveSplit.CompareAgainstPrevious
             state.OnReset += State_OnReset;
 
             Settings = new CompareAgainstPreviousSettings();
+            Settings.ComparisonNameChanged += Settings_ComparisonNameChanged;
+        }
+
+        private void Settings_ComparisonNameChanged(object sender, EventArgs e)
+        {
+            var settings = sender as CompareAgainstPreviousSettings;
+            CompareAgainstPreviousComparisonGenerator.ComparisonName = settings.ComparisonName;
+
+            // Need to find a way to save what's in the generator
+            // Unload it
+            // Reload it
         }
 
         private void LoadLastRunFromFile(string filePath)
@@ -162,7 +173,7 @@ namespace LiveSplit.CompareAgainstPrevious
         {
             get
             {
-                return "Compare Against Previous Splits";
+                return "Compare Against Previous Run";
             }
         }
 
@@ -184,13 +195,12 @@ namespace LiveSplit.CompareAgainstPrevious
 
         public override XmlNode GetSettings(XmlDocument document)
         {
-            return null;
-            //return Settings.GetSettings(document);
+            return Settings.GetSettings(document);
         }
 
         public override void SetSettings(XmlNode settings)
         {
-            //Settings.SetSettings(settings);
+            Settings.SetSettings(settings);
         }
 
         public override void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode)

@@ -17,22 +17,41 @@ namespace LiveSplit.CompareAgainstPrevious.UI
         public CompareAgainstPreviousSettings()
         {
             InitializeComponent();
+            chkResetRuns.DataBindings.Add("Checked", this, "UseResetRuns", false, DataSourceUpdateMode.OnPropertyChanged);
+            resetRunAmount.DataBindings.Add("Value", this, "UseResetRunPercent", false, DataSourceUpdateMode.OnPropertyChanged);
+            txtComparisonName.DataBindings.Add("Text", this, "ComparisonName", false, DataSourceUpdateMode.OnPropertyChanged);
+            resetRunAmount_ValueChanged(null, null);
         }
 
+        private string _ComparisonName = CompareAgainstPreviousComparisonGenerator.ComparisonName;
+        private int _UseResetRunPercent = 50;
+
         public bool UseResetRuns { get; set; }
-        public string ComparisonName { get; set; }
+        public string ComparisonName
+        {
+            get { return _ComparisonName; }
+            set
+            {
+                _ComparisonName = value;
+                ComparisonNameChanged?.Invoke(this, null);
+            }
+        }
+        public int UseResetRunPercent { get { return _UseResetRunPercent; } set { _UseResetRunPercent = value; } }
+
+
+        public event EventHandler ComparisonNameChanged;
 
         private void chkResetRuns_CheckedChanged(object sender, EventArgs e)
         {
-            chkResetRuns.DataBindings.Add("Checked", this, "UseResetRuns", false, DataSourceUpdateMode.OnPropertyChanged);
-            txtComparisonName.DataBindings.Add("Text", this, "ComparisonName");
+
         }
 
         public void SetSettings(XmlNode node)
         {
             var element = (XmlElement)node;
-            UseResetRuns = SettingsHelper.ParseBool(element["UseResetRuns"));
-            ComparisonName = element["ComparisonName"].Value;
+            UseResetRuns = SettingsHelper.ParseBool(element["UseResetRuns"]);
+            ComparisonName = SettingsHelper.ParseString(element["ComparisonName"]);
+            UseResetRunPercent = SettingsHelper.ParseInt(element["UseResetRunPercent"]);
         }
 
         public XmlNode GetSettings(XmlDocument document)
@@ -40,11 +59,15 @@ namespace LiveSplit.CompareAgainstPrevious.UI
             var parent = document.CreateElement("Settings");
             SettingsHelper.CreateSetting(document, parent, "Version", "1.0");
             SettingsHelper.CreateSetting(document, parent, "UseResetRuns", UseResetRuns);
+            SettingsHelper.CreateSetting(document, parent, "UseResetRunPercent", UseResetRunPercent);
             SettingsHelper.CreateSetting(document, parent, "ComparisonName", ComparisonName);
 
             return parent;
         }
 
-
+        private void resetRunAmount_ValueChanged(object sender, EventArgs e)
+        {
+            txtResetRunPct.Text = string.Format("{0} %", resetRunAmount.Value);
+        }
     }
 }

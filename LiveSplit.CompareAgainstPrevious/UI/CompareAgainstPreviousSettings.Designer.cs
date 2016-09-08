@@ -34,7 +34,10 @@
             this.chkResetRuns = new System.Windows.Forms.CheckBox();
             this.grpRunOptions = new System.Windows.Forms.GroupBox();
             this.ttResetRuns = new System.Windows.Forms.ToolTip(this.components);
+            this.resetRunAmount = new System.Windows.Forms.TrackBar();
+            this.txtResetRunPct = new System.Windows.Forms.TextBox();
             this.grpRunOptions.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.resetRunAmount)).BeginInit();
             this.SuspendLayout();
             // 
             // lblCmpName
@@ -67,6 +70,8 @@
             // 
             // grpRunOptions
             // 
+            this.grpRunOptions.Controls.Add(this.txtResetRunPct);
+            this.grpRunOptions.Controls.Add(this.resetRunAmount);
             this.grpRunOptions.Controls.Add(this.chkResetRuns);
             this.grpRunOptions.Location = new System.Drawing.Point(8, 30);
             this.grpRunOptions.Name = "grpRunOptions";
@@ -79,6 +84,24 @@
             // 
             this.ttResetRuns.Tag = "";
             // 
+            // resetRunAmount
+            // 
+            this.resetRunAmount.Location = new System.Drawing.Point(6, 42);
+            this.resetRunAmount.Maximum = 100;
+            this.resetRunAmount.Name = "resetRunAmount";
+            this.resetRunAmount.Size = new System.Drawing.Size(449, 45);
+            this.resetRunAmount.TabIndex = 4;
+            this.resetRunAmount.Value = 50;
+            this.resetRunAmount.ValueChanged += new System.EventHandler(this.resetRunAmount_ValueChanged);
+            // 
+            // txtResetRunPct
+            // 
+            this.txtResetRunPct.Location = new System.Drawing.Point(116, 16);
+            this.txtResetRunPct.Name = "txtResetRunPct";
+            this.txtResetRunPct.ReadOnly = true;
+            this.txtResetRunPct.Size = new System.Drawing.Size(100, 20);
+            this.txtResetRunPct.TabIndex = 5;
+            // 
             // CompareAgainstPreviousSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -90,6 +113,7 @@
             this.Size = new System.Drawing.Size(472, 160);
             this.grpRunOptions.ResumeLayout(false);
             this.grpRunOptions.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.resetRunAmount)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -102,5 +126,7 @@
         private System.Windows.Forms.CheckBox chkResetRuns;
         private System.Windows.Forms.GroupBox grpRunOptions;
         private System.Windows.Forms.ToolTip ttResetRuns;
+        private System.Windows.Forms.TextBox txtResetRunPct;
+        private System.Windows.Forms.TrackBar resetRunAmount;
     }
 }
