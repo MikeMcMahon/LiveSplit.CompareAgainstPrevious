@@ -78,7 +78,6 @@ namespace LiveSplit.CompareAgainstPrevious
 
                     segment.Comparisons[Name] = newPrevSplit;
                     index++;
-
                 }
             }
             else

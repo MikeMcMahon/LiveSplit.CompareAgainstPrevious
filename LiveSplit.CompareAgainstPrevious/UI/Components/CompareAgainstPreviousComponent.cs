@@ -20,6 +20,7 @@ namespace LiveSplit.CompareAgainstPrevious
         private CompareAgainstPreviousComparisonGenerator _Generator;
         private bool _SuccessfulRun;
         public CompareAgainstPreviousSettings Settings { get; set; }
+        private Dictionary<int, Time> _ResetSplits = new Dictionary<int, Time>();
 
         public CompareAgainstPreviousComponent(LiveSplitState state)
         {
@@ -49,8 +50,8 @@ namespace LiveSplit.CompareAgainstPrevious
             var name = CompareAgainstPreviousComparisonGenerator.ComparisonName;
             var newName = settings.ComparisonName;
 
-            // If we don't do this then it causes a wonky bug that erases the
-            // splits until we reload them from file (renames only work when the name changes)
+            // If we don't do this then it causes a wonky bug that erases the splits
+            // until we reload them from file (renames only work when the name changes)
             if (String.Equals(name, newName))
                 return;
 
@@ -77,7 +78,6 @@ namespace LiveSplit.CompareAgainstPrevious
             {
                 document = XDocument.Load(stream);
             }
-
 
             TimeSpan? currentSegmentRTA = TimeSpan.Zero;
             TimeSpan? previousSplitTimeRTA = TimeSpan.Zero;
@@ -138,12 +138,38 @@ namespace LiveSplit.CompareAgainstPrevious
                 _Generator.IsReset = true;
             else if (!_SuccessfulRun && Settings.UseResetRuns)
             {
-                // 
-                _Generator.IsReset = true;
+                var state = sender as LiveSplitState;
+                float completedSplitsPercent = 100 * ((float)_ResetSplits.Keys.Max() / (float)state.Run.Count);
+
+                if (completedSplitsPercent >= Settings.UseResetRunPercent)
+                {
+                    // Only mark it as a reset when are sure that we've completed more than
+                    // what is required for the threshold
+                    _Generator.IsReset = false;
+                    var overrideSegments = new List<Time>(state.Run.Count);
+
+                    for (int i = 0; i < state.Run.Count; i++)
+                    {
+                        Time overrideTime = new Time(gameTime: null, realTime: null);
+
+                        // Split index is ordinal 1
+                        _ResetSplits.TryGetValue(i + 1, out overrideTime);
+
+                        overrideSegments.Add(overrideTime);
+                    }
+
+                    _Generator.SetOverrideSegments(overrideSegments);
+                } else
+                {
+                    _Generator.IsReset = true;
+                }
             }
 
             // Always reset to false, we'll only set to true if we have times for all of our splits
             _SuccessfulRun = false;
+
+            // Ensure that on reset the run is tidy
+            _ResetSplits.Clear();
         }
 
         private void State_OnUndoSplit(object sender, EventArgs e)
@@ -162,12 +188,22 @@ namespace LiveSplit.CompareAgainstPrevious
             TimeSpan? currentSegmentGameTime = TimeSpan.Zero;
             TimeSpan? previousSplitTimeGameTime = TimeSpan.Zero;
 
+            if (Settings.UseResetRuns)
+            {
+                var state = sender as LiveSplitState;
+                _ResetSplits.Add(state.CurrentSplitIndex, state.CurrentTime);
+            }
+
             // When a run ends we want to update the splits for the monitored split for real time or game time
             if (State.CurrentPhase == TimerPhase.Ended)
             {
                 // When a run ends we hit this before reset, so we need to make sure
                 // We don't ignore the run
-                _SuccessfulRun = true;   
+                _SuccessfulRun = true;
+
+                // When we have reset splits and we're using reset runs we're gonna use them on a reset
+                // This was not a reset, so lets clear out what we have tracked
+                _ResetSplits.Clear();
                 foreach (Segment split in State.Run)
                 {
                     // We need to look at the current splits so we can see if there was a skipped split
