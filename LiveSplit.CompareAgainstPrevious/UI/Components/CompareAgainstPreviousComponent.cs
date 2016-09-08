@@ -49,8 +49,13 @@ namespace LiveSplit.CompareAgainstPrevious
             var name = CompareAgainstPreviousComparisonGenerator.ComparisonName;
             var newName = settings.ComparisonName;
 
+            // If we don't do this then it causes a wonky bug that erases the
+            // splits until we reload them from file (renames only work when the name changes)
+            if (String.Equals(name, newName))
+                return;
+
             // Essentially stolen logic from the LayoutSettingsDialog
-            // First thing first, change the currentcomparison to match what it should be
+            // First things first: change the currentcomparison to match what it should be
             if (State.CurrentComparison == name)
                 State.CurrentComparison = newName;
 
@@ -129,9 +134,15 @@ namespace LiveSplit.CompareAgainstPrevious
         private void State_OnReset(object sender, TimerPhase value)
         {
             // If the run was reset before it was complete we don't want to compare against it... 
-            if (!_SuccessfulRun)
+            if (!_SuccessfulRun && !Settings.UseResetRuns)
                 _Generator.IsReset = true;
+            else if (!_SuccessfulRun && Settings.UseResetRuns)
+            {
+                // 
+                _Generator.IsReset = true;
+            }
 
+            // Always reset to false, we'll only set to true if we have times for all of our splits
             _SuccessfulRun = false;
         }
 
