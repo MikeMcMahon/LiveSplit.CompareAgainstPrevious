@@ -11,12 +11,12 @@ namespace LiveSplit.CompareAgainstPrevious
     {
         public static Time CompareAgainstPrevious(this ISegment segment)
         {
-            return segment.Comparisons["My Previous Splits"];
+            return segment.Comparisons[CompareAgainstPreviousComparisonGenerator.ComparisonName];
         }
 
         public static void CompareAgainstPrevious(this ISegment segment, Time newTime)
         {
-            segment.Comparisons["My Previous Splits"] = newTime;
+            segment.Comparisons[CompareAgainstPreviousComparisonGenerator.ComparisonName] = newTime;
         }
     }
 }
